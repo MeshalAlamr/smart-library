@@ -22,7 +22,7 @@ Linux kernel 5.15.0-72-generic Ubuntu Linux Desktop 20.04 Focal Fossa
   ```shell
   https://github.com/tesseract-ocr/tesseract
   ```
-  
+
 ### Services
 
 1. **backend**: Huggingface, Pytorch, Tensorflow, pytesseract, FastAPI
@@ -51,9 +51,30 @@ Linux kernel 5.15.0-72-generic Ubuntu Linux Desktop 20.04 Focal Fossa
    python server.py
    ```
 
-### **backend**
 ### **database**
+Follow the official documentation for MongoDB to create your own database and connect it to the FastAPI backend
+```
+https://www.mongodb.com/
+```
+OR use the offical MongoDB docker container
+```
+https://hub.docker.com/_/mongo
+```
 ### **frontend**
+To start the react app
+1. Install node v16.10.0 and npm v7.24.0
+2. Navigate to frontend
+   ```shell
+   cd frontend
+   ```
+3. Install the node packages
+   ```shell
+   npm install
+   ```
+4. Run react dev server
+   ```shell
+   npm start
+   ```
 
 ## Instructions
 
@@ -88,7 +109,7 @@ Create Dockerfiles for each services and a Docker Compose file for a multi-servi
 
 ## Submission
 1. Please clone your copy of this repository:
-```shell
+```
 git clone https://github.com/mort8q/ml-task
 ```
 2. Complete the tasks mentioned under [Instructions](#instructions) for for the team you have chosen.
