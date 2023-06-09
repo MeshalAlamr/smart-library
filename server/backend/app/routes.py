@@ -34,15 +34,26 @@ def index():
             if response.status_code == 200:
                 summary = response.json()['data']
             
+            print("Predicting topics...")
+            response = requests.post(f'{backend_url}/topic', json={'text': summary})
+            if response.status_code == 200:
+                topics = response.json()['data']
+
+            print("Predicting sentiment...")
+            response = requests.post(f'{backend_url}/sentiment', json={'text': summary})
+            if response.status_code == 200:
+                sentiment = response.json()['data']
+            
             print("Formatting data...")
             document = {
-                'type': request.form['type'],
+                'type': request.form['type'].title(),
                 'name': request.form['name'],
                 'author': request.form['author'],
                 'year': request.form['year'],
                 'publisher': request.form['publisher'],
                 'summary': summary,
-                # 'sentiment': request.form['sentiment']
+                'topics': topics,
+                'sentiment': sentiment
             }
             return render_template("index.html", document=document)
         
@@ -57,6 +68,7 @@ def index():
                     'year': request.form['year'],
                     'publisher': request.form['publisher'],
                     'summary': request.form['summary'],
+                    'topics': request.form['topics'],
                     'sentiment': request.form['sentiment']
                 }
                 response = requests.post(f'{backend_url}/insert', json={'document': document})
