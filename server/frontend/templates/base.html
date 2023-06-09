@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{url_for('static',filename='dist/css/output.css')}}"
+    />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Smart Library</title>
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='images/online-library.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{url_for('static',filename='dist/css/tailwind.min.css')}}"
+    />
+  </head>
+  <body>
+    <nav
+      class="bg-blue-600 px-2 sm:px-4 py-2.5 dark:bg-gray-900 fixed w-full z-20 top-0 left-0 border-b border-gray-300 shadow-md dark:border-gray-600"
+    >
+      <div class="flex flex-wrap items-center justify-between mx-auto">
+        <a href="{{ url_for('index') }}" class="flex items-center" alt="logo">
+          <img
+            src="{{ url_for('static', filename='images/online-library.png')}}"
+            class="h-8 mr-0 sm:h-12"
+            alt="Flowbite Logo"
+          />
+          <span
+            class="self-center text-white text-2xl ml-2 font-semibold whitespace-nowrap dark:text-white"
+            >Smart Library</span
+          >
+        </a>
+      </div>
+    </nav>
+
+    {% block body %} {% endblock %}
+  </body>
+</html>
