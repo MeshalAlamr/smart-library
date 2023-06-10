@@ -12,6 +12,7 @@ services:
     networks:
       server_network:
         ipv4_address: 172.25.0.2
+    restart: on-failure
 
 
   backend:
@@ -31,12 +32,10 @@ services:
       PYTHONUNBUFFERED: "true"
       MONGO_ADDRESS: mongodb
       CONTAINERIZED: "true"
-    #   OPENAI_API_KEY: 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
     networks:
       server_network:
         ipv4_address: 172.25.0.3
-    # restart: on-failure
-
+    restart: on-failure
 
   server:
     build: ./server
@@ -49,10 +48,13 @@ services:
     environment:
       BACKEND_API_ADDRESS: backend
       MONGODB: mongodb
+      PYTHONUNBUFFERED: "true"
+    env_file:
+      - .env
     networks:
       server_network:
         ipv4_address: 172.25.0.4
-    # restart: on-failure
+    restart: on-failure
 
 networks:
   server_network:
