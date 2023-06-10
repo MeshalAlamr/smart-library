@@ -15,7 +15,8 @@
 - The results are sent back to the user and displayed on the screen. 
 - The user can then edit the information if needed. After that, the user can confirm and the information will be added to the MongoDB database.
 
-![Team1](https://github.com/MeshalAlamr/smart-library/assets/68873733/b184c749-7570-4d9a-9bdc-48bb9ca399c4)
+
+![Team1](https://github.com/MeshalAlamr/smart-library/assets/68873733/756aeaf3-bafa-43c4-8c9f-a2fc72993d4e)
 
 ### Team 2 Task (Users)
 **Description:**<br>
@@ -29,8 +30,7 @@
 - The results are sent back to the user and displayed on the screen.
 - Additionally, if an OpenAI API key is provided, the query, summary, topic, and sentiment are sent to the OpenAI API to generate a response as a helpful librarian. The response is then displayed on the screen.
 
-
-![Team2](https://github.com/MeshalAlamr/smart-library/assets/68873733/7d4422a5-1a5b-401e-bd23-ce5fdca67db2)
+![Team2](https://github.com/MeshalAlamr/smart-library/assets/68873733/a1076c72-dc70-4bc4-9bbe-2601475e256c)
 
 ## Getting Started
 
