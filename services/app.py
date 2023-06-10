@@ -1,14 +1,16 @@
-import os
-import pytesseract
-from flask import Flask, request, jsonify
-from pdf2image import convert_from_bytes
 import base64
+import os
+
+import pytesseract
 import torch
-from transformers import pipeline, AutoModelForSequenceClassification, AutoTokenizer
+from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
+from pdf2image import convert_from_bytes
 from scipy.special import expit
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from transformers import (AutoModelForSequenceClassification, AutoTokenizer,
+                          pipeline)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
@@ -32,17 +34,13 @@ topic_class_mapping = topic_model.config.id2label
 # sentiment_hf = "cardiffnlp/twitter-roberta-base-sentiment"
 sentiment_hf = "models/sentiment_pipeline"
 
-sentiment_labels = {
-    "LABEL_0": 'negative',
-    "LABEL_1": 'neutral',
-    "LABEL_2": 'positive'
-}
+sentiment_labels = {"LABEL_0": "negative", "LABEL_1": "neutral", "LABEL_2": "positive"}
 
 sentiment_pipeline = pipeline(
-    task='sentiment-analysis',
+    task="sentiment-analysis",
     model=sentiment_hf,
-    device=0 if torch.cuda.is_available() else -1
-    )
+    device=0 if torch.cuda.is_available() else -1,
+)
 
 similarity_hf = "sentence-transformers/all-MiniLM-L6-v2"
 similarity_model = SentenceTransformer(similarity_hf)
@@ -56,7 +54,7 @@ if not os.getenv("CONTAINERIZED", False):
 
 mongo_url = os.getenv("MONGO_ADDRESS", "localhost")
 mongo_url = f"mongodb://{mongo_url}:27017/mltask"
-app.config['MONGO_URI'] = mongo_url
+app.config["MONGO_URI"] = mongo_url
 
 mongo = PyMongo(app)
 resources = mongo.db.resources
@@ -125,6 +123,7 @@ def summarize():
     )[0]["summary_text"]
     return jsonify({"data": summary})
 
+
 @app.route("/insert", methods=["POST"])
 def insert_documents():
     """
@@ -133,13 +132,18 @@ def insert_documents():
     try:
         mongo.db.list_collection_names()
     except:
-        return jsonify({"data": "An error occurred while connecting to the database. Please try again later."})
-    if request.method == 'POST':
+        return jsonify(
+            {
+                "data": "An error occurred while connecting to the database. Please try again later."
+            }
+        )
+    if request.method == "POST":
         data = request.get_json()
-        document = data['document']
-        result = resources.insert_one(document)  
+        document = data["document"]
+        result = resources.insert_one(document)
         print("Inserted document ID: ,", result.inserted_id)
         return jsonify({"data": "Document inserted successfully!"})
+
 
 @app.route("/topic", methods=["POST"])
 def topic():
@@ -149,7 +153,7 @@ def topic():
     data = request.get_json()
     text = data["text"]
     print("predicting topics...")
-    tokens = topic_tokenizer(text, return_tensors='pt')
+    tokens = topic_tokenizer(text, return_tensors="pt")
     output = topic_model(**tokens)
     scores = expit(output[0][0].detach().numpy())
     predictions = (scores >= 0.4) * 1
@@ -158,13 +162,14 @@ def topic():
     # Map to classes
     for i in range(len(predictions)):
         if predictions[i]:
-            pred = topic_class_mapping[i].replace('_', ' ').title()
+            pred = topic_class_mapping[i].replace("_", " ").title()
             topics.append(pred)
-    
+
     # join topics with comma
     topics = ", ".join(topics)
 
     return jsonify({"data": topics})
+
 
 @app.route("/sentiment", methods=["POST"])
 def sentiment():
@@ -175,10 +180,11 @@ def sentiment():
     text = data["text"]
 
     print("predicting sentiment...")
-    predicted_sentiment = sentiment_pipeline(text)[0]['label']
+    predicted_sentiment = sentiment_pipeline(text)[0]["label"]
     predicted_sentiment = sentiment_labels[predicted_sentiment].title()
 
     return jsonify({"data": predicted_sentiment})
+
 
 @app.route("/search", methods=["POST"])
 def search():
@@ -192,9 +198,9 @@ def search():
     documents = resources.find()
     results = []
     for document in documents:
-        if 'summary' not in document:
+        if "summary" not in document:
             continue
-        document_vector = similarity_model.encode([document['summary']])
+        document_vector = similarity_model.encode([document["summary"]])
         similarity_score = cosine_similarity(query_vector, document_vector)[0][0]
         results.append((document, similarity_score))
     results = sorted(results, key=lambda x: x[1], reverse=True)
@@ -204,18 +210,18 @@ def search():
         print("No results found.")
 
     document = {
-        'type': document['type'] if document['type'] else 'None',
-        'name': document['name'] if document['name'] else 'None',
-        'author': document['author'] if document['author'] else 'None',
-        'year': document['year'] if document['year'] else 'None',
-        'publisher': document['publisher'] if document['publisher'] else 'None',
-        'summary': document['summary'] if document['summary'] else 'None',
-        'topics': document['topics'] if document['topics'] else 'None',
-        'sentiment': document['sentiment'] if document['sentiment'] else 'None',
+        "type": document["type"] if document["type"] else "None",
+        "name": document["name"] if document["name"] else "None",
+        "author": document["author"] if document["author"] else "None",
+        "year": document["year"] if document["year"] else "None",
+        "publisher": document["publisher"] if document["publisher"] else "None",
+        "summary": document["summary"] if document["summary"] else "None",
+        "topics": document["topics"] if document["topics"] else "None",
+        "sentiment": document["sentiment"] if document["sentiment"] else "None",
     }
     print(results)
     return jsonify({"data": document})
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=8000)
+    app.run(debug=True, host="0.0.0.0", port=8000)
