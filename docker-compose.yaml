@@ -1,0 +1,61 @@
+version: "3.5"
+
+services:
+  mongodb:
+    image: mongo:latest
+    # environment:
+    #   MONGO_INITDB_DATABASE: resources
+      # MONGO_INITDB_ROOT_USERNAME: user
+      # MONGO_INITDB_ROOT_PASSWORD: pass
+    ports:
+      - 27017:27017
+    networks:
+      server_network:
+        ipv4_address: 172.25.0.2
+
+
+  backend:
+    build:
+      context: ./services
+    container_name: "backend"
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      PYTHONUNBUFFERED: "true"
+    #   OPENAI_API_KEY: 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
+    networks:
+      server_network:
+        ipv4_address: 172.25.0.3
+    # restart: on-failure
+
+
+  server:
+    build: ./server
+    container_name: server
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+      - mongodb
+    environment:
+      BACKEND_API_ADDRESS: backend
+      MONGODB: mongodb
+    networks:
+      server_network:
+        ipv4_address: 172.25.0.4
+    # restart: on-failure
+
+networks:
+  server_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.0.0/16

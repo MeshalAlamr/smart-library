@@ -1,14 +1,40 @@
 from flask import app, jsonify, render_template, request, redirect, url_for, flash
 import requests
 from backend.app import app
-import csv
 from tempfile import NamedTemporaryFile
 import os
 import base64
 from io import BytesIO
-import shutil
+import time
 
-backend_url = 'http://localhost:8000'
+# time.sleep(10)
+backend_url = os.getenv("BACKEND_API_ADDRESS", "localhost")
+backend_url = f"http://{backend_url}:8000"
+
+# response = requests.get(f'{backend_url}/status')
+# if response.status_code != 200 or response.json()['Status'] != 'OK!':
+#     assert False, "Backend server is not running."
+
+from backend.app import mongo
+
+# print("Waiting for MongoDB to start...")
+# while True:
+#     try:
+#         mongo.db.list_collection_names()
+#         break
+#     except:
+#         time.sleep(1)
+# print("MongoDB started.")
+
+# print("Waiting for backend server to start...")
+# while True:
+#     try:
+#         response = requests.get(f'{backend_url}/status')
+#         if response.status_code == 200 and response.json()['Status'] == 'OK!':
+#             break
+#     except:
+#         time.sleep(1)
+# print("Backend server started.")
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
@@ -28,6 +54,8 @@ def index():
             response = requests.post(f'{backend_url}/extract', json={'file': file_encoded})
             if response.status_code == 200:
                 extracted_text = response.json()['data']
+            else:
+                return render_template("index.html", msg="Error: Could not extract text from PDF.")
 
             print("Summarizing text...")
             response = requests.post(f'{backend_url}/summarize', json={'text': extracted_text})
@@ -78,9 +106,6 @@ def index():
         else:
             return render_template("index.html")
     return render_template("index.html")
-
-# @app.route("/insert", methods=["POST", "GET"])
-# def insert_documents():
 
 if __name__ == "__main__":
     app.run(debug=True)
