@@ -1,119 +1,117 @@
 
 # Smart Library
 
-![Logo](./assets/book.png)
+## Demo
 
-You are tasked to create to improve the public library of your local community by allow people to interact with books, articles, newspapers and magazines in the library with the help of Artificial Intelligentce. There are two teams assigned to complete two related sub-tasks for this project to enable library users to digital interact with the content:
+### Team 1 Task (Librarians)
+**Description:**<br>
+- The user uploads a PDF file and fills in the information.
+- The file is sent to the backend server to be processed.
+- The backend server using tysseract and HuggingFace models does the following:
+  - Extracts the text from the PDF file.
+  - Summarizes the text.
+  - Predicts the topics of the text.
+  - Predicts the sentiment of the text.
+- The results are sent back to the user and displayed on the screen. 
+- The user can then edit the information if needed. After that, the user can confirm and the information will be added to the MongoDB database.
 
-1. Team 1: Create an interface that librarians could use to upload books, articles, newspapers and magazines as PDF and and a Machine Learning Model will extract the text, summarize and classify it and save it to a database. 
-2. Team 2: Create an interface for library users to write a query and an AI model will compare it to all the summaries of books and return the best result. 
+![Team1](https://github.com/MeshalAlamr/smart-library/assets/68873733/b184c749-7570-4d9a-9bdc-48bb9ca399c4)
 
-</br>
+### Team 2 Task (Users)
+**Description:**<br>
+- The user enters a query in the search bar.
+- The query is sent to the backend server to be processed.
+- The backend server using HuggingFace models does the following:
+  - Embeds the summaries of the books in the database.
+  - Embeds the query. 
+  - Finds the most similar summary to the query.
+  - Returns the related document.
+- The results are sent back to the user and displayed on the screen.
+- Additionally, if an OpenAI API key is provided, the query, summary, topic, and sentiment are sent to the OpenAI API to generate a response as a helpful librarian. The response is then displayed on the screen.
 
-![Portrait](./assets/library.jpg)
 
-## Tech Stack
+![Team2](https://github.com/MeshalAlamr/smart-library/assets/68873733/7d4422a5-1a5b-401e-bd23-ce5fdca67db2)
 
-### Operating System
-Linux kernel 5.15.0-72-generic Ubuntu Linux Desktop 20.04 Focal Fossa
+## Getting Started
 
-### Dependencies 
-- Tesseract OCR: Follow the installation instruction 
-  ```shell
-  https://github.com/tesseract-ocr/tesseract
-  ```
+Clone the repository
 
-### Services
-
-1. **backend**: Huggingface, Pytorch, Tensorflow, pytesseract, FastAPI
-2. **frontend**: React
-4. **database**: mongoDB
-
-## Installation
-
-### **backend**
-1. Install python 3.10.0
-   > You can choose any python environment management system you prefer (conda, pyenv, venv ... etc)
-2. Navigate to the ai directory
-   ```shell
-   cd ai
-   ```
-3. Install the python packages
-   ```shell
-   pip install -r requirements.txt
-   ```
-4. Navigate to the src directory 
-    ```shell
-    cd src
-    ```
-5. Run the FastAPI server
-   ```shell
-   python server.py
-   ```
-
-### **database**
-Follow the official documentation for MongoDB to create your own database and connect it to the FastAPI backend
 ```
-https://www.mongodb.com/
+git clone https://github.com/MeshalAlamr/smart-library.git
 ```
-OR use the offical MongoDB docker container
+
+Move to project directory
+
 ```
-https://hub.docker.com/_/mongo
+cd smart-library
 ```
-### **frontend**
-To start the react app
-1. Install node v16.10.0 and npm v7.24.0
-2. Navigate to frontend
-   ```shell
-   cd frontend
-   ```
-3. Install the node packages
-   ```shell
-   npm install
-   ```
-4. Run react dev server
-   ```shell
-   npm start
-   ```
-
-## Instructions
-
-Your goal is to choose which team you want play and depedning on the team complete the following tasks for each section. A skeleton is provided as a starter code.</br>
-
-You will be following a microservice architecture to help the library summarize, classify and retrieve relevent entries based on queries library users write. After successfuly complete the application. You will write the necessary Docker and Docker Compose files to deploy the application (Well, only locally for now 💻). 
 
 
-#### Team 1
-1. Create simple page with a file upload form along with text boxes to write the details of the resource (e.g. resource type: [book, article, newspaper, magaznine], resource name, publish year, author ... etc)
-   > A sample data is provided under database directory
-2. Use Huggingface models to summaries the resource 
-   > A function is already provided to extract text from pdf files
-   
-   > Bonus: Use a Question-Answering model or text classification model
-3. Write an endpoint to save the summary along with the resource details to database
+### Note:
+If you want to use the Librarian's Answer feature, you need to provide your OpenAI API key in the .env file. You can get one from [here](https://beta.openai.com/).
 
-#### Team 2
-1. Create a simple page with query text box for library users to enter any search point.
-2. Use Huggingface model to get the most relevant resource from the database text similarity from the resource summary
-3. Write an endpoint to get the query from text box, go through the resource enteries, get similarities and return the most releveant resource name
+Modify the .env file to include your API key
 
+```
+OPENAI_API_KEY='Your Key Here'
+```
 
-## Deployment
-Create Dockerfiles for each services and a Docker Compose file for a multi-service deployment. 
+ This project supports both running on Docker or locally.
+<br>
+
+### Using Docker:
+<details>
+<summary>Docker</summary>
+<br>
   
-## Authors
-- [@mort8Q](https://www.github.com/mort8q)
-
-  
-  
-
-## Submission
-1. Please clone your copy of this repository:
+```shell
+docker compose up
 ```
-git clone https://github.com/mort8q/ml-task
-```
-2. Complete the tasks mentioned under [Instructions](#instructions) for for the team you have chosen.
-3. You are encourged to git, commit your changes at multiple stages of your work. 
-4. Compress your project folder with (zip, tar, or 7z) formats
-6. Email back your work within 72 hours
+  
+</details>
 
+
+### Installing locally:
+<details>
+<summary>Local</summary>
+<br>
+Start by creating a Conda environmnet or whichever environment manager you prefer.
+<br><br>
+Install requirements
+
+```shell
+pip install -r requirements.txt
+```
+
+
+### **Backend Server**
+1. From the project directory, navigate to the backend directory
+   ```shell
+   cd services
+   ```
+
+2. Download the models
+   ```
+   python download_models.py
+   ```
+
+3. Start the backend server
+   ```
+   python app.py
+   ```
+
+### **Web Server**
+> **Note:** The backend server must be running before starting the web server.
+1. Start another terminal, from the project directory, navigate to the server directory
+   ```shell
+   cd server
+   ```
+
+2. Start the server
+   ```
+   python run.py
+   ```
+
+</details>
+
+### After running the server, open the browser and go to http://127.0.0.1:3000/ to start.
