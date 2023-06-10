@@ -3,6 +3,7 @@ services/models
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+.vs_code/
 *.pyc
 *.py[cod]
 *$py.class
