@@ -1,4 +1,4 @@
-import io
+import os
 import pytesseract
 from flask import Flask, request, jsonify
 from pdf2image import convert_from_bytes
@@ -44,11 +44,14 @@ sentiment_pipeline = pipeline(
 
 app = Flask(__name__)
 
-pytesseract.pytesseract.tesseract_cmd = (
-    r"C:\Users\Meshal\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
-)
+if os.getenv("CONTAINERIZED", False):
+    pytesseract.pytesseract.tesseract_cmd = (
+        r"C:\Users\Meshal\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
+    )
 
-app.config['MONGO_URI'] = 'mongodb://mongodb:27017/mltask'
+mongo_url = os.getenv("MONGO_ADDRESS", "localhost")
+mongo_url = f"mongodb://{mongo_url}:27017/mltask"
+app.config['MONGO_URI'] = mongo_url
 
 mongo = PyMongo(app)
 

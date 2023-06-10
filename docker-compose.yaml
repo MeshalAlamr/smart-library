@@ -29,6 +29,8 @@ services:
               capabilities: [gpu]
     environment:
       PYTHONUNBUFFERED: "true"
+      MONGO_ADDRESS: mongodb
+      CONTAINERIZED: "true"
     #   OPENAI_API_KEY: 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
     networks:
       server_network:
