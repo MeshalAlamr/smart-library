@@ -1,1 +1,2 @@
-FROM mongo:6.0.3-focal 
+FROM mongodb/mongodb-community-server:6.0-ubi8
+

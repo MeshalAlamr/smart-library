@@ -8,8 +8,11 @@ from transformers import pipeline, AutoModelForSequenceClassification, AutoToken
 from flask_pymongo import PyMongo
 from scipy.special import expit
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
 
-summarizer_hf = "pszemraj/led-base-book-summary"
+# summarizer_hf = "pszemraj/led-base-book-summary"
+summarizer_hf = "models/summarizer"
 
 summarizer_pipeline = pipeline(
     "summarization",
@@ -17,13 +20,16 @@ summarizer_pipeline = pipeline(
     device=0 if torch.cuda.is_available() else -1,
 )
 
-topic_hf = "cardiffnlp/tweet-topic-21-multi"
+# topic_hf = "cardiffnlp/tweet-topic-21-multi"
+topic_hf = "models/topic_model"
 topic_tokenizer = AutoTokenizer.from_pretrained(topic_hf)
 topic_model = AutoModelForSequenceClassification.from_pretrained(topic_hf)
 topic_class_mapping = topic_model.config.id2label
 
 
-sentiment_hf = "cardiffnlp/twitter-roberta-base-sentiment"
+# sentiment_hf = "cardiffnlp/twitter-roberta-base-sentiment"
+sentiment_hf = "models/sentiment_pipeline"
+
 sentiment_labels = {
     "LABEL_0": 'negative',
     "LABEL_1": 'neutral',
@@ -37,11 +43,12 @@ sentiment_pipeline = pipeline(
     )
 
 app = Flask(__name__)
-pytesseract.pytesseract.tesseract_cmd = (
-    r"C:\Users\Meshal\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
-)
 
-app.config['MONGO_URI'] = 'mongodb://localhost:27017/mltask'
+# pytesseract.pytesseract.tesseract_cmd = (
+#     r"C:\Users\Meshal\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
+# )
+
+app.config['MONGO_URI'] = 'mongodb://mongodb:27017/mltask'
 
 mongo = PyMongo(app)
 
@@ -159,4 +166,4 @@ def sentiment():
     return jsonify({"data": predicted_sentiment})
 
 if __name__ == "__main__":
-    app.run(debug=True, port="8000")
+    app.run(debug=True, host='0.0.0.0', port=8000)
