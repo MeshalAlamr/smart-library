@@ -44,9 +44,9 @@ sentiment_pipeline = pipeline(
 
 app = Flask(__name__)
 
-pytesseract.pytesseract.tesseract_cmd = (
-    r"C:\Users\Meshal\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
-)
+# pytesseract.pytesseract.tesseract_cmd = (
+#     r"C:\Users\Meshal\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
+# )
 
 app.config['MONGO_URI'] = 'mongodb://mongodb:27017/mltask'
 
