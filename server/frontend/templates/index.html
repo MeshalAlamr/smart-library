@@ -128,12 +128,12 @@
           </form>
       
           {% if document %}
-          <div class="mt-8">
-            <div class="bg-blue-100 p-4 rounded-md">
+          <div class="mt-8 items-center justify-center">
+            <div class="bg-blue-100 p-4 shadow-lg rounded-md">
               <form name="preview-form" method="POST" enctype="multipart/form-data">
-                <h2 class="text-lg font-semibold">Document Information</h2>
+                <h2 class="text-3xl text-center font-bold pb-4 text-blue-800">Document Information</h2>
                 <div class="mt-4">
-                  <div class="w-9/12 sm:w-10/12 mx-auto mt-4 mb-6 flex flex-col space-y-4">
+                  <div class="w-9/12 sm:w-11/12 mx-auto mt-4 mb-6 flex flex-col space-y-4">
                     <div class="flex items-center">
                       <label for="type" class="w-1/4 text-blue-600 text-xl font-bold text-left">Type:</label>
                       <input value="{{ document.type }}" id="type" name="type" class="w-full px-3 py-3 border-2 text-blue-600 border-blue-400 placeholder-blue-300 font-medium text-center rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" placeholder="Type">
@@ -178,9 +178,9 @@
                 </div>
                 </div>
 
-                <div class="mt-4">
-                  <button name="confirm-button" type="submit" class="px-4 py-2 mr-2 bg-green-500 text-white rounded-md">Confirm</button>
-                  <button name="cancel-button" type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md">Cancel</button>
+                <div class="mt-6 flex items-center justify-center mb-8"> 
+                  <button name="confirm-button" type="submit" class="w-1/3 text-lg px-4 font-semibold py-3 mx-6 bg-green-500 text-white rounded-md">Confirm</button>
+                  <button name="cancel-button" type="submit" class="w-1/3 text-lg px-4 font-semibold py-3 mx-6 bg-red-500 text-white rounded-md">Cancel</button>
                 </div>
                 <input type="hidden" name="preview-form">
               </form>

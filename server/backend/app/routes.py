@@ -11,6 +11,10 @@ import time
 backend_url = os.getenv("BACKEND_API_ADDRESS", "localhost")
 backend_url = f"http://{backend_url}:8000"
 
+try:
+    requests.get(f'{backend_url}/status')
+except requests.exceptions.ConnectionError or ConnectionRefusedError:
+    assert False, "Backend server is not running."
 # response = requests.get(f'{backend_url}/status')
 # if response.status_code != 200 or response.json()['Status'] != 'OK!':
 #     assert False, "Backend server is not running."
@@ -105,7 +109,7 @@ def index():
                 return render_template("index.html", msg="Document inserted successfully!")
         else:
             return render_template("index.html")
-    return render_template("index.html")
+    return render_template("index.html", document="ay")
 
 if __name__ == "__main__":
     app.run(debug=True)
