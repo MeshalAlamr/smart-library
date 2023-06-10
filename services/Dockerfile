@@ -20,5 +20,3 @@ EXPOSE 8000
 
 CMD ["python3", "app.py"]
 
-# CMD [ "gunicorn", "app:app", "-w", "2", "--threads", "2", "-b", "0.0.0.0:8000" ]
-

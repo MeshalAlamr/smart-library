@@ -61,6 +61,15 @@ resources = mongo.db.resources
 queries = mongo.db.queries
 
 
+
+@app.route("/status", methods=["GET"])
+def status():
+    """
+    A function to check the status of the server.
+    """
+    return jsonify({"Status": "OK!"})
+
+
 def extract_text_from_pdf(pdf):
     """
     A function to convert multi-page pdf to images
@@ -81,34 +90,20 @@ def extract_text_from_pdf(pdf):
     return text_data
 
 
-@app.route("/status", methods=["GET"])
-def status():
-    """
-    A function to check the status of the server.
-    """
-    return jsonify({"Status": "OK!"})
-
-
-@app.route("/extract", methods=["POST"])
-def extract():
+def extract(file_encoded):
     """
     A function that extracts text from PDF documents.
     """
-    data = request.get_json()
-    file_encoded = data["file"]
     file_content = base64.b64decode(file_encoded)
     print("extracting text from pdf...")
     pdf_text = extract_text_from_pdf(file_content)
-    return jsonify({"data": pdf_text})
+    return pdf_text
 
 
-@app.route("/summarize", methods=["POST"])
-def summarize():
+def summarize(text):
     """
     A function that summarizes text.
     """
-    data = request.get_json()
-    text = data["text"]
     print("summarizing text...")
     summary = summarizer_pipeline(
         text,
@@ -121,7 +116,65 @@ def summarize():
         do_sample=False,
         early_stopping=True,
     )[0]["summary_text"]
-    return jsonify({"data": summary})
+
+    return summary
+
+
+def topic(text):
+    """
+    A function that predicts topics of a text.
+    """
+    print("predicting topics...")
+    tokens = topic_tokenizer(text, return_tensors="pt")
+    output = topic_model(**tokens)
+    scores = expit(output[0][0].detach().numpy())
+    predictions = (scores >= 0.4) * 1
+
+    topics = []
+    # Map to classes
+    for i in range(len(predictions)):
+        if predictions[i]:
+            pred = topic_class_mapping[i].replace("_", " ").title()
+            topics.append(pred)
+
+    # join topics with comma
+    topics = ", ".join(topics)
+
+    return topics
+
+
+def sentiment(text):
+    """
+    A function that predicts the sentiment of a text.
+    """
+
+    print("predicting sentiment...")
+    predicted_sentiment = sentiment_pipeline(text)[0]["label"]
+    predicted_sentiment = sentiment_labels[predicted_sentiment].title()
+
+    return predicted_sentiment
+
+@app.route("/process", methods=["POST"])
+def process():
+    """
+    A function that processes a document.
+    It extracts text, summarizes it, predicts topics and sentiment.
+    """
+    data = request.get_json()
+    file_encoded = data["file"]
+    extracted_text = extract(file_encoded)
+    summary = summarize(extracted_text)
+    topics = topic(summary)
+    predicted_sentiment = sentiment(summary)
+    return jsonify(
+        {
+            "data": {
+                "summary": summary,
+                "topics": topics,
+                "sentiment": predicted_sentiment,
+            }
+        }
+    )
 
 
 @app.route("/insert", methods=["POST"])
@@ -142,49 +195,8 @@ def insert_documents():
         document = data["document"]
         result = resources.insert_one(document)
         print("Inserted document ID: ,", result.inserted_id)
+
         return jsonify({"data": "Document inserted successfully!"})
-
-
-@app.route("/topic", methods=["POST"])
-def topic():
-    """
-    A function that predicts topics of a text.
-    """
-    data = request.get_json()
-    text = data["text"]
-    print("predicting topics...")
-    tokens = topic_tokenizer(text, return_tensors="pt")
-    output = topic_model(**tokens)
-    scores = expit(output[0][0].detach().numpy())
-    predictions = (scores >= 0.4) * 1
-
-    topics = []
-    # Map to classes
-    for i in range(len(predictions)):
-        if predictions[i]:
-            pred = topic_class_mapping[i].replace("_", " ").title()
-            topics.append(pred)
-
-    # join topics with comma
-    topics = ", ".join(topics)
-
-    return jsonify({"data": topics})
-
-
-@app.route("/sentiment", methods=["POST"])
-def sentiment():
-    """
-    A function that predicts the sentiment of a text.
-    """
-    data = request.get_json()
-    text = data["text"]
-
-    print("predicting sentiment...")
-    predicted_sentiment = sentiment_pipeline(text)[0]["label"]
-    predicted_sentiment = sentiment_labels[predicted_sentiment].title()
-
-    return jsonify({"data": predicted_sentiment})
-
 
 @app.route("/search", methods=["POST"])
 def search():

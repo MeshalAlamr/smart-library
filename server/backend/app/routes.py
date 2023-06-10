@@ -8,8 +8,7 @@ import openai
 import requests
 from backend.app import app
 from dotenv import load_dotenv
-from flask import (app, flash, jsonify, redirect, render_template, request,
-                   url_for)
+from flask import render_template, request
 
 load_dotenv()
 
@@ -37,36 +36,6 @@ while retry_count < max_retries:
         time.sleep(retry_interval)
 else:
     print("Maximum retries exceeded. Failed to start the backend server.")
-
-
-# try:
-#     requests.get(f'{backend_url}/status')
-# except requests.exceptions.ConnectionError or ConnectionRefusedError:
-# assert False, "Backend server is not running."
-# response = requests.get(f'{backend_url}/status')
-# if response.status_code != 200 or response.json()['Status'] != 'OK!':
-#     assert False, "Backend server is not running."
-
-from backend.app import mongo
-
-# print("Waiting for MongoDB to start...")
-# while True:
-#     try:
-#         mongo.db.list_collection_names()
-#         break
-#     except:
-#         time.sleep(1)
-# print("MongoDB started.")
-
-# print("Waiting for backend server to start...")
-# while True:
-#     try:
-#         response = requests.get(f'{backend_url}/status')
-#         if response.status_code == 200 and response.json()['Status'] == 'OK!':
-#             break
-#     except:
-#         time.sleep(1)
-# print("Backend server started.")
 
 
 def librarian(query, summary, topic, sentiment):
@@ -109,33 +78,43 @@ def index():
             file_encoded = base64.b64encode(file_content).decode("utf-8")
 
             # Send the file to the backend server
-            print("Extracting text from PDF...")
+            print("Sending file to backend server...")
             response = requests.post(
-                f"{backend_url}/extract", json={"file": file_encoded}
-            )
-            if response.status_code == 200:
-                extracted_text = response.json()["data"]
-            else:
-                return render_template(
-                    "index.html", msg="Error: Could not extract text from PDF."
+                    f"{backend_url}/process", json={"file": file_encoded}
                 )
-
-            print("Summarizing text...")
-            response = requests.post(
-                f"{backend_url}/summarize", json={"text": extracted_text}
-            )
+            
             if response.status_code == 200:
-                summary = response.json()["data"]
+                data = response.json()["data"]
+                summary = data["summary"]
+                topics = data["topics"]
+                sentiment = data["sentiment"]
+            # print("Extracting text from PDF...")
+            # response = requests.post(
+            #     f"{backend_url}/extract", json={"file": file_encoded}
+            # )
+            # if response.status_code == 200:
+            #     extracted_text = response.json()["data"]
+            # else:
+            #     return render_template(
+            #         "index.html", msg="Error: Could not extract text from PDF."
+            #     )
 
-            print("Predicting topics...")
-            response = requests.post(f"{backend_url}/topic", json={"text": summary})
-            if response.status_code == 200:
-                topics = response.json()["data"]
+            # print("Summarizing text...")
+            # response = requests.post(
+            #     f"{backend_url}/summarize", json={"text": extracted_text}
+            # )
+            # if response.status_code == 200:
+            #     summary = response.json()["data"]
 
-            print("Predicting sentiment...")
-            response = requests.post(f"{backend_url}/sentiment", json={"text": summary})
-            if response.status_code == 200:
-                sentiment = response.json()["data"]
+            # print("Predicting topics...")
+            # response = requests.post(f"{backend_url}/topic", json={"text": summary})
+            # if response.status_code == 200:
+            #     topics = response.json()["data"]
+
+            # print("Predicting sentiment...")
+            # response = requests.post(f"{backend_url}/sentiment", json={"text": summary})
+            # if response.status_code == 200:
+            #     sentiment = response.json()["data"]
 
             print("Formatting data...")
             document = {
