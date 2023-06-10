@@ -6,15 +6,42 @@ import os
 import base64
 from io import BytesIO
 import time
+import openai
+
+from dotenv import load_dotenv
+load_dotenv()
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # time.sleep(10)
 backend_url = os.getenv("BACKEND_API_ADDRESS", "localhost")
 backend_url = f"http://{backend_url}:8000"
 
-try:
-    requests.get(f'{backend_url}/status')
-except requests.exceptions.ConnectionError or ConnectionRefusedError:
-    assert False, "Backend server is not running."
+
+print("Waiting for backend server to start...")
+retry_count = 0
+max_retries = 30
+retry_interval = 3
+
+while retry_count < max_retries:
+    try:
+        response = requests.get(f'{backend_url}/status')
+        response.raise_for_status()  # Raise an exception if the response status is an error (e.g., 404, 500)
+        print("Backend server started successfully!")
+        break
+    except requests.RequestException as e:
+        print(f"Error connecting to the backend server: {e}")
+        retry_count += 1
+        time.sleep(retry_interval)
+else:
+    print("Maximum retries exceeded. Failed to start the backend server.")
+
+
+
+# try:
+#     requests.get(f'{backend_url}/status')
+# except requests.exceptions.ConnectionError or ConnectionRefusedError:
+    # assert False, "Backend server is not running."
 # response = requests.get(f'{backend_url}/status')
 # if response.status_code != 200 or response.json()['Status'] != 'OK!':
 #     assert False, "Backend server is not running."
@@ -39,6 +66,30 @@ from backend.app import mongo
 #     except:
 #         time.sleep(1)
 # print("Backend server started.")
+
+def librarian(query, summary, topic, sentiment):
+
+    prompt_template = f"""You are a smart helpful librarian that will assist users in finding resources. 
+    Given a user's query, and the most relevant resource's summary, topic, and sentiment, provide a response to the user's query.
+    Be enthusiastic in your response and relate to the user's query. Mention that the resource is below, but do not provide anything.
+
+    User Query: {query}
+    Resource Summary: {summary}
+    Resource Topic: {topic}
+    Resource Sentiment: {sentiment}
+
+    Response:
+    """
+
+    ChatML = [
+        {'role' : 'system', 'content' : 'You are a smart helpful librarian that will assist users in finding resources.'},
+        {'role' : 'user', 'content' : prompt_template}
+        ]
+    
+    completion = openai.ChatCompletion.create(model='gpt-3.5-turbo', messages=ChatML)
+
+    return completion.choices[0].message.content
+
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
@@ -109,7 +160,28 @@ def index():
                 return render_template("index.html", msg="Document inserted successfully!")
         else:
             return render_template("index.html")
-    return render_template("index.html", document="ay")
+    return render_template("index.html", document="")
+
+@app.route("/users", methods=['POST', 'GET'])
+def users():
+    if request.method == 'POST':
+        query = request.form['query']
+        print("Querying database...")
+        response = requests.post(f'{backend_url}/search', json={'query': query})
+        if response.status_code == 200:
+            document = response.json()['data']
+        else:
+            return render_template("users.html", msg="An error occurred while querying the database. Please try again later.")
+        
+        print("Sending query to librarian...")
+        try:
+            librarian_response = librarian(query, document['summary'], document['topics'], document['sentiment'])
+        except:
+            print("An error occurred while communicating with the Librarian. Please try again later.")
+            librarian_response = ""
+
+        return render_template("users.html", document=document, answer=librarian_response)
+    return render_template("users.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

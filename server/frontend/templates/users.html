@@ -1,0 +1,255 @@
+{% extends "base.html" %} {% block body %}
+<style>
+  .loading-spinner {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    top: 85%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    margin: -25px 0 0 -25px;
+    border-radius: 50%;
+    border: 5px solid #ccc;
+    border-top-color: rgb(48, 117, 245);
+    animation: spin 1s ease-in-out infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+<section class="h-screen">
+  <div class="grid grid-cols-none sm:grid-cols-8 pt-4 h-screen">
+    <div class="invisible pt-24 pl-0 col-span-2 justify-center sm:block">
+      <img
+        src="{{ url_for('static', filename='images/img4.png')}}"
+        class="w-full h-4/5"
+      />
+    </div>
+
+    <div class="pt-20 sm:pt-20 col-span-4">
+      <!-- Display Logo -->
+      <div class="flex justify-center">
+        <img
+          src="{{ url_for('static', filename='images/online-library.png')}}"
+          alt="Logo"
+          class="w-3/12 h-3/12 text-white"
+        />
+      </div>
+
+      <div class="loading-spinner">
+        <div class="flex justify-center items-center h-full">
+          <div
+            class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"
+          ></div>
+        </div>
+      </div>
+
+      <div class="justify-center items-center">
+        <div class="w-full px-1 items-center">
+          <h1 class="font-bold text-center mb-8 text-blue-500 text-3xl sm:text-6xl mt-6">
+            Smart Library
+          </h1>
+          <p class="text-center font-medium text-blue-400 text-xl">Your gateway to a world of knowledge</p>
+      
+          <form id="query-form" class="justify-center" method="POST" enctype="multipart/form-data">
+            <div class="mt-6 w-full items-center">
+                <div class="text-center">
+                  <input type="text" id="search-box" name="query" placeholder="Enter your search query here" class="w-3/4 py-3 text-center border border-gray-500 rounded-lg focus:outline-none focus:border-blue-400" />
+                  <button type="submit" class="ml-2 px-4 py-3 bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-00 focus:outline-none">Search</button>
+                </div>
+            </div>
+            <input type="hidden" name="query-form">
+          </form>
+
+          {% if answer %}
+
+          <!-- Helpful librarian answer -->
+          <div class="mt-8 p-4 pt-6 relative bg-blue-50 rounded-md shadow-lg">
+            <h2 class="text-2xl font-semibold text-blue-500 mb-4 pt-1">
+              Librarian's Answer:
+            </h2>
+            <div class="pb-1">
+            <img src="{{ url_for('static', filename='images/bot.png')}}" alt="Bot Icon" class="w-20 h-20 absolute top-0 right-0  mt-1 mb-2 mr-0">
+            </div>
+            <p class="text-lg font-medium ml-2 mb-2 text-gray-600">{{ answer }}</p>
+          </div>
+
+          <!-- <div class="mt-8 p-2 bg-blue-50 rounded-md shadow-lg flex items-start">
+            <img src="{{ url_for('static', filename='images/bot.png')}}" alt="Bot Icon" class="w-20 h-20 mr-2 self-start">
+            <div>
+              <h2 class="text-2xl font-semibold text-blue-400 mb-4">
+                Helpful Librarian:
+              </h2>
+              <p class="text-lg ml-12 mb-4 p-2 font-medium text-gray-700">{{ answer }}</p>
+            </div>
+          </div> -->
+          
+
+          {% endif %}
+      
+          {% if document %}
+          <div class="mt-8 items-center pb-6 justify-center">
+            <div class="bg-blue-100 p-4 shadow-lg rounded-md">
+                <h2 class="text-3xl text-center font-bold pb-4 text-blue-800">Retrieved Document Information</h2>
+                <div class="mt-4">
+                  <div class="w-9/12 sm:w-11/12 mx-auto mt-4 mb-6 flex flex-col space-y-4">
+                    <div class="flex items-center">
+                      <label for="type" class="w-1/4 text-blue-600 text-xl font-bold text-left">Type:</label>
+                      <p class="w-full px-3 bg-white py-3 border-2 text-blue-600 border-blue-400 placeholder-blue-300 font-medium text-center rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+                        {{ document.type }}
+                      </p>
+                    </div>
+                  
+                    <div class="flex items-center">
+                      <label for="name" class="w-1/4 text-blue-600 text-xl font-bold text-left">Name:</label>
+                      <p class="w-full px-3 bg-white py-3 border-2 text-blue-600 border-blue-400 placeholder-blue-300 font-medium text-center rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+                        {{ document.name }}
+                      </p>
+                    </div>
+                  
+                    <div class="flex items-center">
+                      <label for="author" class="w-1/4 text-blue-600 text-xl font-bold text-left">Author:</label>
+                      <p class="w-full px-3 bg-white py-3 border-2 text-blue-600 border-blue-400 placeholder-blue-300 font-medium text-center rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+                        {{ document.author }}
+                      </p>
+                    </div>
+                  
+                    <div class="flex items-center">
+                      <label for="year" class="w-1/4 text-blue-600 text-xl font-bold text-left">Year:</label>
+                      <p class="w-full px-3 bg-white py-3 border-2 text-blue-600 border-blue-400 placeholder-blue-300 font-medium text-center rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+                        {{ document.year }}
+                      </p>
+                    </div>
+                  
+                    <div class="flex items-center">
+                      <label for="publisher" class="w-1/4 text-blue-600 text-xl font-bold text-left">Publisher:</label>
+                      <p class="w-full px-3 bg-white py-3 border-2 text-blue-600 border-blue-400 placeholder-blue-300 font-medium text-center rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+                        {{ document.publisher }}
+                      </p>
+                    </div>
+
+                    <div class="flex items-center">
+                      <label for="summary" class="w-1/4 text-blue-600 text-xl font-bold text-left">Summary:</label>
+                      <p class="w-full px-3 bg-white py-3 border-2 text-blue-600 border-blue-400 placeholder-blue-300 font-medium text-center rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+                        {{ document.summary }}
+                      </p>
+                    </div>
+
+                    <div class="flex items-center">
+                      <label for="topics" class="w-1/4 text-blue-600 text-xl font-bold text-left">Topics:</label>
+                      <p class="w-full px-3 bg-white py-3 border-2 text-blue-600 border-blue-400 placeholder-blue-300 font-medium text-center rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+                        {{ document.topics }}
+                      </p>
+                    </div>
+
+                    <div class="flex items-center">
+                      <label for="sentiment" class="w-1/4 text-blue-600 text-xl font-bold text-left">Sentiment:</label>
+                      <p class="w-full px-3 bg-white py-3 border-2 text-blue-600 border-blue-400 placeholder-blue-300 font-medium text-center rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+                        {{ document.sentiment }}
+                      </p>
+                    </div>
+
+                  </div>
+                </div>
+                </div>
+
+                <!-- <div class="mt-6 flex items-center justify-center mb-8"> 
+                  <button name="confirm-button" type="submit" class="w-1/3 text-lg px-4 font-semibold py-3 mx-6 bg-green-500 text-white rounded-md">Confirm</button>
+                  <button name="cancel-button" type="submit" class="w-1/3 text-lg px-4 font-semibold py-3 mx-6 bg-red-500 text-white rounded-md">Cancel</button>
+                </div>
+                <input type="hidden" name="preview-form"> -->
+              <!-- </form> -->
+            </div>
+          </div>
+          {% endif %}
+
+      </div>
+    </div>
+
+    <div class="invisible pt-0 pl-24 pb-0 col-span-2 sm:block">
+      <img
+        src="{{ url_for('static', filename='images/img.svg')}}"
+        class="w-full h-full"
+      />
+    </div>
+  </div>
+</section>
+
+<script>
+  var form = document.querySelector('form');
+  var spinner = document.querySelector('.loading-spinner');
+  
+  form.addEventListener('submit', function() {
+  spinner.style.display = 'block';
+  });
+  
+  window.addEventListener('load', function() {
+  spinner.style.display = 'none';
+  });
+
+const fileInput = document.getElementById('pdf');
+const dropZone = document.querySelector('.border-dashed');
+const previewImage = document.getElementById('preview-image');
+
+
+dropZone.addEventListener('dragover', (event) => {
+  event.preventDefault();
+  dropZone.classList.add('border-blue-500');
+});
+
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('border-blue-500');
+});
+
+dropZone.addEventListener('drop', (event) => {
+  event.preventDefault();
+  dropZone.classList.remove('border-blue-500');
+  const file = event.dataTransfer.files[0];
+  fileInput.files = event.dataTransfer.files;
+  updateUploadText(fileInput);
+});
+
+fileInput.addEventListener('change', function() {
+  updateUploadText(fileInput);
+});
+
+function updateUploadText(input) {
+    const uploadText = document.getElementById("file_name");
+    const fileName = input.files[0].name;
+    console.log(fileName);
+
+    if (input.files.length > 0) {
+      uploadText.innerHTML = "Uploaded <b> " + fileName + "</b>";
+    } else {
+      uploadText.innerHTML = "Upload a PDF to get started";
+    }
+  }
+
+const submitButton = document.getElementById('submit-button');
+// if submit button is clicked, and file is not uploaded, prevent form submission and display error message
+submitButton.addEventListener('click', function(event) {
+  if (fileInput.files.length == 0) {
+    event.preventDefault();
+    alert("Please upload a PDF file to get started.");
+  }
+});
+
+</script>
+
+{% if msg %}
+<script>
+  alert("{{ msg }}");
+</script>
+{% endif %}
+
+<script> 
+  if ( window.history.replaceState ) {
+  window.history.replaceState( null, null, window.location.href );
+  }
+</script>
+{% endblock %}
